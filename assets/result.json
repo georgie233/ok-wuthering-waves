@@ -611,6 +611,18 @@
             "height": 2160,
             "id": 101,
             "file_name": "images/101.png"
+        },
+        {
+            "id": 102,
+            "file_name": "images/102.png",
+            "width": 2310,
+            "height": 990
+        },
+        {
+            "id": 103,
+            "file_name": "images/103.png",
+            "width": 2310,
+            "height": 990
         }
     ],
     "categories": [
@@ -1669,6 +1681,14 @@
         {
             "id": 263,
             "name": "ww"
+        },
+        {
+            "id": 264,
+            "name": "account_switch_button"
+        },
+        {
+            "id": 265,
+            "name": "account_switch_button2"
         }
     ],
     "annotations": [
@@ -4686,6 +4706,36 @@
             "ignore": 0,
             "iscrowd": 0,
             "area": 3205.217902757874
+        },
+        {
+            "id": 202,
+            "image_id": 102,
+            "category_id": 264,
+            "segmentation": [],
+            "bbox": [
+                2160,
+                468,
+                95,
+                100
+            ],
+            "ignore": 0,
+            "iscrowd": 0,
+            "area": 9500
+        },
+        {
+            "id": 203,
+            "image_id": 103,
+            "category_id": 265,
+            "segmentation": [],
+            "bbox": [
+                2160,
+                468,
+                95,
+                100
+            ],
+            "ignore": 0,
+            "iscrowd": 0,
+            "area": 9500
         }
     ],
     "info": {

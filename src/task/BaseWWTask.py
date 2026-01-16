@@ -662,17 +662,62 @@ class BaseWWTask(BaseTask):
 
     def wait_login(self):
         if not self._logged_in:
-            if self.find_one('login_account', vertical_variance=0.1, threshold=0.7):
-                self.wait_until(lambda: self.find_one('login_account', threshold=0.7) is None,
-                                pre_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=30)
-                self.wait_until(lambda: self.find_one('monthly_card', threshold=0.7) or self.in_team_and_world(),
-                                pre_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=120)
-                self.wait_until(lambda: self.in_team_and_world(),
-                                post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=5)
-                self.log_info('Auto Login Success', notify=True)
-                self._logged_in = True
-                self.sleep(3)
-                return True
+            try:
+                account_count = self.config.get('Account Count')
+                if self.config.get('Enable Multi Accounts') and account_count is not None and int(str(account_count)) > 1:
+                    self.log_info(f'Enable Multi Accounts ON, Account Count = {account_count}')
+            except Exception:
+                pass
+            # if self.config.get('Enable Multi Accounts') and self.config.get('Account Count') is not None and int(str(self.config.get('Account Count'))) > 1:
+            #     right_box = self.box_of_screen(0.87, 0.0, 1.0, 1.0)
+            #     texts_try = self.ocr(box=right_box)
+            #     # 点击更换账号
+            #     if acc := self.find_boxes(texts_try, match=["账号", "Account"]):
+            #         self.click(acc, after_sleep=0.2)
+            #         self.sleep(3)
+            #         # 点击确认登出
+            #         confirm = self.wait_ocr(match=[re.compile(r"^确认登出$"), re.compile(r"^Confirm Logout$")], raise_if_not_found=False, settle_time=1)
+            #         if confirm:
+            #             self.click(confirm, after_sleep=0.2)
+            #             self.sleep(3)
+            #             self.click(confirm, after_sleep=0.2)
+            #             from src.win.DialogLoginHelper import click_account_and_login
+            #             self.log_info('Multi Accounts: start login sequence')
+            #             self.sleep(3)
+            #             self.log_info('Multi Accounts: after confirm sleep 3')
+            #             # 点击一下触发登录框
+            #             self.click_relative(0.5, 0.95, after_sleep=0.0)
+            #             self.log_info('Multi Accounts: clicked bottom area')
+            #             self.sleep(3)
+            #             self.log_info('Multi Accounts: invoking click_account_and_login(2)')
+            #             # 登录框切换账号
+            #             ret = click_account_and_login(1)
+            #             self.log_info(f'Multi Accounts: click_account_and_login returned {ret}')
+            #             # 等待进入游戏
+            #             self.wait_until(lambda: self.find_one('monthly_card', threshold=0.7) or self.in_team_and_world(),
+            #                             pre_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=120)
+            #             self.log_info('Multi Accounts: passed monthly_card/in_team_and_world wait')
+            #             self.wait_until(lambda: self.in_team_and_world(),
+            #                             post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=5)
+            #             self.log_info('Multi Accounts: entered team and world')
+            #             self.log_info('Auto Login Success', notify=True)
+            #             self._logged_in = True
+            #             self.sleep(3)
+            #             return True
+            if int(str(self.config.get('Account Count'))) > 999:
+                pass
+            else:
+                if self.find_one('login_account', vertical_variance=0.1, threshold=0.7):
+                    self.wait_until(lambda: self.find_one('login_account', threshold=0.7) is None,
+                                    pre_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=30)
+                    self.wait_until(lambda: self.find_one('monthly_card', threshold=0.7) or self.in_team_and_world(),
+                                    pre_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=120)
+                    self.wait_until(lambda: self.in_team_and_world(),
+                                    post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=3), time_out=5)
+                    self.log_info('Auto Login Success', notify=True)
+                    self._logged_in = True
+                    self.sleep(3)
+                    return True
             texts = self.ocr()
             if login := self.find_boxes(texts, boundary=self.box_of_screen(0.3, 0.3, 0.7, 0.7), match="登录"):
                 self.click(login)
@@ -690,6 +735,23 @@ class BaseWWTask(BaseTask):
                     self.click(start)
                     self.log_info(f'点击开始游戏! {start}')
                     return False
+    def exit_login(self):
+        self.sleep(1.0)
+        self.send_key('esc', after_sleep=0.5)
+        self.sleep(1.5)
+        self.click_relative(0.05, 0.96, after_sleep=0.5)
+        self.log_info('Exit Login: clicked bottom-left')
+        self.sleep(2.0)
+        for _ in range(8):
+            texts = self.ocr()
+            back = self.find_boxes(texts, match=[re.compile(r"^返回登录$"), "Return to Login"])
+            if back:
+                self.click(back, after_sleep=1)
+                self.log_info('Exit Login: return to login')
+                return True
+            self.sleep(2)
+        self.log_info('Exit Login: return to login not found')
+        return False
 
     def in_team_and_world(self):
         return self.in_team()[

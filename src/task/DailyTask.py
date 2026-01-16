@@ -31,12 +31,16 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
             'Material Selection': 'Shell Credit',
             'Auto Farm all Nightmare Nest': False,
             'Farm Nightmare Nest for Daily Echo': True,
+            'Enable Multi Accounts': False,
+            'Account Count': '1',
         }
         self.config_description = {
             'Which Tacet Suppression to Farm': 'The Tacet Suppression number in the F2 list.',
             'Which Forgery Challenge to Farm': 'The Forgery Challenge number in the F2 list.',
             'Material Selection': 'Resonator EXP / Weapon EXP / Shell Credit',
-            'Farm Nightmare Nest for Daily Echo': 'Farm 1 Echo from Nightmare Nest to complete Daily Task when needed.'
+            'Farm Nightmare Nest for Daily Echo': 'Farm 1 Echo from Nightmare Nest to complete Daily Task when needed.',
+            'Enable Multi Accounts': 'Enable Multi Accounts for Daily Task (Sequential run)',
+            'Account Count': 'Account Count (1–4, sequential order)',
         }
         material_option_list = ['Resonator EXP', 'Weapon EXP', 'Shell Credit']
         self.config_type = {
@@ -48,12 +52,61 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
                 'type': 'drop_down',
                 'options': material_option_list
             },
+            'Account Count': {
+                'type': 'drop_down',
+                'options': ['1', '2', '3', '4']
+            },
         }
         self.description = "Login, claim monthly card, farm echo, and claim daily reward"
 
     def run(self):
         WWOneTimeTask.run(self)
+        enable_multi = self.config.get('Enable Multi Accounts')
+        count = self.config.get('Account Count')
+        try:
+            count_int = int(str(count)) if count is not None else 1
+        except Exception:
+            count_int = 1
+        self.log_info(f'Multi Accounts: enable={enable_multi} count={count_int}')
+        if enable_multi and count_int > 1:
+            for i in range(1, count_int + 1):
+                self.log_info(f'Multi Accounts: begin account {i}')
+                self.ensure_main(time_out=180)
+                texts = self.ocr()
+                start = self.find_boxes(texts, boundary='bottom_right', match=["开始游戏", re.compile("进入游戏")])
+                if start:
+                    self.click(start, after_sleep=1)
+                    self.wait_until(lambda: self.in_team_and_world(),
+                                    post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=2), time_out=10)
+                self._run_daily_one_account()
+                if i < count_int:
+                    if not self.exit_login():
+                        self.log_info('Exit Login Failed')
+                        break
+                    self.sleep(20)
+                    from src.win.DialogLoginHelper import click_account_and_login
+                    self.log_info(f'Multi Accounts: switch to account {i+1}')
+                    click_account_and_login(i + 1)
+                    self.click_relative(0.5, 0.95, after_sleep=0.5)
+                    self.log_info('Multi Accounts: clicked bottom area to raise login form')
+                    self.wait_until(lambda: self.in_team_and_world(),
+                                    post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=2), time_out=20)
+                else:
+                    self.log_info('Multi Accounts: last account reached, finish without exit')
+            self.log_info('Task completed', notify=True)
+            return
         self.ensure_main(time_out=180)
+        texts = self.ocr()
+        start = self.find_boxes(texts, boundary='bottom_right', match=["开始游戏", re.compile("进入游戏")])
+        if start:
+            self.click(start, after_sleep=1)
+            self.wait_until(lambda: self.in_team_and_world(),
+                            post_action=lambda: self.click_relative(0.5, 0.9, after_sleep=2), time_out=10)
+            self._run_daily_one_account()
+        if not self.exit_login():
+            self.log_info('Exit Login Failed')
+        self.log_info('Task completed', notify=True)
+    def _run_daily_one_account(self):
         condition1 = self.config.get('Auto Farm all Nightmare Nest')
         condition2 = self.config.get('Farm Nightmare Nest for Daily Echo')
         if condition1 or condition2:
@@ -69,7 +122,6 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
             except Exception as e:
                 self.log_error("NightmareNestTask Failed", e)
                 self.ensure_main(time_out=180)
-
         used_stamina, completed = self.open_daily()
         self.send_key('esc', after_sleep=1)
         if not completed:
@@ -86,11 +138,9 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
                                                                            config=self.config)
                 self.sleep(4)
             self.claim_daily()
-
         self.claim_mail()
         self.sleep(1)
         self.claim_battle_pass()
-        self.log_info('Task completed', notify=True)
 
     def claim_battle_pass(self):
         self.log_info('battle pass')

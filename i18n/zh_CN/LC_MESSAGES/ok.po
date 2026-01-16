@@ -198,6 +198,18 @@ msgstr "几点会弹出月卡提示, 本地计算机时间(1-24)"
 msgid "must be in game world and in teams, please check you game resolution is 16:9"
 msgstr "必须在大世界队伍中, 请点击截图测试,检查游戏分辨率是否是16:9"
 
+msgid "Enable Multi Accounts for Daily Task (Sequential run)"
+msgstr "启用多账号日常（按顺序依次执行）"
+
+msgid "Account Count (1–5, sequential order)"
+msgstr "账号数量（1–5，按顺序切换）"
+
+msgid "Enable Multi Accounts"
+msgstr "启用多账号日常"
+
+msgid "Account Count"
+msgstr "账号数量"
+
 msgid "Capture Frame Count"
 msgstr "截图次数"
 

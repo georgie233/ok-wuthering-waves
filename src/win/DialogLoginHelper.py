@@ -89,7 +89,10 @@ def _click_combo_lbox_item(hwnd, n):
     rect = win32gui.GetClientRect(hwnd)
     w = rect[2] - rect[0]
     client_x = int(round(w / 2))
-    client_y = COMBO_LBOX_ITEM_HEIGHT + int(round(COMBO_LBOX_ITEM_HEIGHT * 2 * (n - 1)))
+    # 88*(n-1) + 44
+    client_y = int(COMBO_LBOX_ITEM_HEIGHT) + int(round((COMBO_LBOX_ITEM_HEIGHT * 2) * (n - 1)))
+    print('点击高度:')
+    print(client_y)
     _post_click(hwnd, client_x, client_y, 0.05)
  
 def _click_child_control(ctrl):

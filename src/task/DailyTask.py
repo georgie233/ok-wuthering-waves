@@ -87,6 +87,7 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
                     from src.win.DialogLoginHelper import click_account_and_login
                     self.log_info(f'Multi Accounts: switch to account {i+1}')
                     click_account_and_login(i + 1)
+                    self.sleep(3)
                     self.click_relative(0.5, 0.95, after_sleep=0.5)
                     self.log_info('Multi Accounts: clicked bottom area to raise login form')
                     self.wait_until(lambda: self.in_team_and_world(),

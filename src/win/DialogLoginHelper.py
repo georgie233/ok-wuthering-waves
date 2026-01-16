@@ -104,6 +104,12 @@ def _click_child_control(ctrl):
         cy = int(round(ctrl.height / 2))
         _post_click(hwnd, cx, cy, 0.05)
 
+def _move_cursor_away():
+    try:
+        win32api.SetCursorPos((0, 0))
+    except Exception:
+        pass
+
 
 def click_account_and_login(account_num):
     if not isinstance(account_num, int) or account_num < 1 or account_num > 4:
@@ -127,10 +133,12 @@ def click_account_and_login(account_num):
         cx_open, cy_open = _screen_to_client(dlg, center_x, open_y)
         _post_click(dlg, cx_open, cy_open, 0.05)
     time.sleep(COMBO_LBOX_WAIT_TIME)
+    _move_cursor_away()
     lbox = _find_combo_lbox_by_lt(rect)
     if lbox:
         _click_combo_lbox_item(lbox, account_num)
     time.sleep(1)
+    _move_cursor_away()
     login_ctrl = _find_control_at(childs, center_x, int(round(open_y + 175)))
     if login_ctrl:
         time.sleep(2)

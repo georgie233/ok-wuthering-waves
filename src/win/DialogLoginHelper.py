@@ -89,7 +89,7 @@ def _click_combo_lbox_item(hwnd, n):
     rect = win32gui.GetClientRect(hwnd)
     w = rect[2] - rect[0]
     client_x = int(round(w / 2))
-    client_y = int(round(COMBO_LBOX_ITEM_HEIGHT * n))
+    client_y = COMBO_LBOX_ITEM_HEIGHT + int(round(COMBO_LBOX_ITEM_HEIGHT * 2 * (n - 1)))
     _post_click(hwnd, client_x, client_y, 0.05)
  
 def _click_child_control(ctrl):
@@ -127,10 +127,12 @@ def click_account_and_login(account_num):
     lbox = _find_combo_lbox_by_lt(rect)
     if lbox:
         _click_combo_lbox_item(lbox, account_num)
-    time.sleep(0.2)
+    time.sleep(1)
     login_ctrl = _find_control_at(childs, center_x, int(round(open_y + 175)))
     if login_ctrl:
+        time.sleep(2)
         _click_child_control(login_ctrl)
+        time.sleep(2)
     else:
         login_y = int(round(top + h * 0.39 + 2 * 88))
         cx_login, cy_login = _screen_to_client(dlg, center_x, login_y)

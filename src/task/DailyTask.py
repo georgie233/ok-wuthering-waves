@@ -196,7 +196,8 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
         total_points = self.get_total_daily_points()
         self.info_set('daily points', total_points)
         if total_points < 100:
-            raise Exception("Can't complete daily task, may need to increase stamina manually!")
+            self.log_info("Can't complete daily task, may need to increase stamina manually!")
+            return
 
         self.click(0.89, 0.85, after_sleep=1)
         self.ensure_main(time_out=10)
